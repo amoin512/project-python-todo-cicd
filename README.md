@@ -20,19 +20,19 @@ The app creates a text file 'todo_list.txt' to store tasks persistently which pr
 ## GitHub Actions CI/CD Workflow
 
 The pipeline is defnied in `.gtihub/workflows/deploy.yml`. 
-It runs automatically on every push to the main branch.
+It runs automatically on every push to the master branch.
 
-**Steps:**
+**Jobs:**
 1. **Build & Push** - Creates a Docker image and pushes it to Docker Hub.
 
 ```
-build-and-push:
+  build-and-push:
     runs-on: ubuntu-latest
     steps:
       - name: Get code for runner
         uses: actions/checkout@v4
       - name: Build Image
-        run: docker build -t todo-list-image:v3 -f Project-2_AutomateTodoList/Dockerfile Project-2_AutomateTodoList/
+        run: docker build -t todo-list-image:v3 .
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
@@ -79,13 +79,13 @@ build-and-push:
           cluster_name: ${{ env.GKE_CLUSTER }}
           location: ${{ env.GKE_LOCATION }}
       
-      - id: 'get-pods'
+      - id: 'test-get-pods'
         run: kubectl get pods #requires Kubernetes Engine Developer role
 
       - name: Deploy to GKE
         run: |
-          kubectl create -f Project-2_AutomateTodoList/resources.yml
-          kubectl get pods
+          kubectl create -f resources.yml
+          kubectl get pods  
 ```
 
 ## Accessing the App in GKE
