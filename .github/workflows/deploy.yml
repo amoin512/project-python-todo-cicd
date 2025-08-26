@@ -61,5 +61,5 @@ jobs:
 
       - name: Deploy to GKE
         run: |
-          kubectl create -f Project-2_AutomateTodoList/resources.yml
+          kubectl create -f resources.yml
           kubectl get pods
