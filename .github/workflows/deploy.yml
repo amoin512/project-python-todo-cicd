@@ -1,4 +1,4 @@
-name: CI/CD Pipeline for Project-2
+name: CI/CD Pipeline for ToDo-List App
 
 on: 
   push:
