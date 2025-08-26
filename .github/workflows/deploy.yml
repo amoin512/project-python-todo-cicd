@@ -3,7 +3,7 @@ name: CI/CD Pipeline for Project-2
 on: 
   push:
     branches:
-      - main
+      - master
 
 env:
   PROJECT_ID: ${{ secrets.GKE_PROJECT }}
@@ -18,7 +18,7 @@ jobs:
       - name: Get code for runner
         uses: actions/checkout@v4
       - name: Build Image
-        run: docker build -t todo-list-image:v3 -f Project-2_AutomateTodoList/Dockerfile Project-2_AutomateTodoList/
+        run: docker build -t todo-list-image:v3 .
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
