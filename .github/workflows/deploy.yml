@@ -1,0 +1,65 @@
+name: CI/CD Pipeline for Project-2
+
+on: 
+  push:
+    branches:
+      - main
+
+env:
+  PROJECT_ID: ${{ secrets.GKE_PROJECT }}
+  GKE_CLUSTER: project-cluster-1
+  GKE_LOCATION: us-east1
+  WORKLOAD_NAME: todo-list
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get code for runner
+        uses: actions/checkout@v4
+      - name: Build Image
+        run: docker build -t todo-list-image:v3 -f Project-2_AutomateTodoList/Dockerfile Project-2_AutomateTodoList/
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Tag and push the image
+        run: |
+          docker image ls
+          docker tag todo-list-image:v3 moina512/python-todo-list-repo:v3
+          docker push moina512/python-todo-list-repo:v3
+          echo "Build and push have been successful!"
+  test-on-docker:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deoloy on Docker
+        run:  echo 4 | docker run -i moina512/python-todo-list-repo:v3
+  
+  login-and-deploy-to-GKE:
+    needs: test-on-docker
+    if: success()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get code for runner
+        uses: actions/checkout@v4
+      - name: Install gcloud CLI
+        uses: google-github-actions/auth@v2
+        with:
+          project_id: ${{ env.PROJECT_ID }}
+          credentials_json: ${{ secrets.GKE_SA_KEY }}
+      
+      - name: Get GKE credentials
+        uses: google-github-actions/get-gke-credentials@v2
+        with:
+          cluster_name: ${{ env.GKE_CLUSTER }}
+          location: ${{ env.GKE_LOCATION }}
+      
+      - id: 'test-get-pods'
+        run: kubectl get pods #requires Kubernetes Engine Developer role
+
+      - name: Deploy to GKE
+        run: |
+          kubectl create -f Project-2_AutomateTodoList/resources.yml
+          kubectl get pods

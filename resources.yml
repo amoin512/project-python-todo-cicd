@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: todo-app-2
+  labels:
+    app: todo-list-2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: todo-list-2
+  template:
+    metadata:
+      labels:
+        app: todo-list-2
+    spec:
+      containers:
+      - name: todo-2-c
+        image: moina512/python-todo-list-repo:v3
+        command: ["python", "code.py"]
+        stdin: true #enable interactive input
+        tty: true #allocate TTY for interactive sessions
+        ports:
+        - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: todo-app-2-service
+spec:
+  type: LoadBalancer
+  selector:
+    app: todo-list-2
+  ports:
+    - protocol: TCP
+      port: 80 #exposed port for external access
+      targetPort: 80 #port inside the container
